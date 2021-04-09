@@ -32,11 +32,11 @@ interface IJsonOutput {
  * until you find {}.  Stop at {} and do not include it in what you have
  * matched." The groups to stop at are as follows:
  *
- *   - (\n\n)  -->  double new line
- *   - ( {}\n) -->  {} followed by a new line
- *   - ( {\n)  -->  { followed by a new line
+ *   - (\n\n)  -->  double NL
+ *   - ( {}\n) -->  {} followed by a NL
+ *   - ( {\n$) -->  { followed by a NL where the NL is the end of the line
  *   - ( = {)  -->  = {
- *   - (\n$)   -->  a new line where the new line is the end of the line
+ *   - (\n$)   -->  a new line where the NL is the end of the line
  */
 export class Docable {
   /**
@@ -131,8 +131,8 @@ export class Docable {
    */
   protected getAllDataMembers(fileContents: string): boolean | string[] {
     const members = fileContents
-      .match(/\/\*\*\n[\s\S]*?(?=((\n\n)|( {}\n)|( {\n)|( = {)|(\n$)))/g);
-    //       \_______________/\______________________________________/
+      .match(/\/\*\*\n[\s\S]*?(?=((\n\n)|( {}\n)|( {\n$)|( = {)|(\n$)))/g);
+    //       \_______________/\_______________________________________/
     //          |                          |
     //          v                          v
     //      See Regex Note 1            See Regex Note 2
