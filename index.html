@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Drash Land | Docable</title>
+    <link rel="stylesheet" href="prismjs/themes/prism-tomorrow.css">
+    <style type="text/css">
+      html {
+        scroll-behavior: smooth;
+      }
+      .line-highlight {
+        background: linear-gradient(to right, hsl(152deg 73% 58% / 26%) 70%, hsla(24, 20%, 50%,0));
+      }
+    </style>
+  </head>
+  
+  <body>
+    <div id="app">
+      <div v-for="namespace in json">
+        <pre class="language-typescript" v-for="member in namespace.members"><code>{{ member }}</code></pre>
+      </div>
+    </div>
+
+    <script src="prismjs/prism.js"></script>
+    <script src="vue/dist/vue.js"></script>
+    <script type="text/javascript">
+      const app = new Vue({
+        data() {
+          return {
+            json: {
+  "Drash.Dictionaries.LogLevels": {
+    "file": "./tests/data/file1.ts",
+    "members": [
+      "/**\n * Contains the type of ServerConfigs\n *\n * directory?: string\n *\n *     The path to the directory of the server on the filesystem.  This is\n *     used when resolving static paths, so make sure you have this set\n *     correctly if you are serving static paths. A quick way to implement\n *     this could be the following:\n *\n *         directory: `${await Deno.realpath('.')}`\n *\n * logger?: Drash.CoreLoggers.ConsoleLogger | Drash.CoreLoggers.FileLogger\n *\n *     The server's logger. For example:\n *\n *         logger: new Drash.CoreLoggers.ConsoleLogger({\n *           enabled: true,\n *           level: \"debug\",\n *           tag_string: \"{date} | {level} |\",\n *           tag_string_fns: {\n *             date: function() {\n *               return new Date().toISOString().replace(\"T\", \" \");\n *             },\n *           },\n *         })\n *\n * memory_allocation?: {\n *   multipart_form_data?: number\n * }\n *     The amount of memory to allocate to certain parts of the codebase.\n *     For example, the multipart reader uses a default of 10MB, but you can\n *     override that default by specifying the following:\n *\n *         memory_allocation: {\n *           multipart_form_data: 128 // This would be translated to 128MB\n *         }\n *\n * middleware?: ServerMiddleware\n *\n *     The middleware that the server will execute during compile time and\n *     runtime.\n *\n *         middleware: {\n *           after_request: []\n *           before_request: []\n *           compile_time: []\n *         }\n *\n * pretty_links?: boolean\n *\n *     Enabling pretty links allows your Drash server to check whether or\n *     not an index.html file exists in a static directory. For example, if\n *     /public/app/index.html exists, then you can go to /public/app and it\n *     will serve the index.html in that static directory.\n *\n * resources?: Drash.Interfaces.Resource[]\n *\n *     An array of resources that the server should register. Passing in 0\n *     resources means clients can't access anything on the server--because\n *     there aren't any resources.\n *\n * response_output?: string\n *\n *     The fallback response Content-Type that the server should use. The\n *     response_output MUST be a proper MIME type. For example, the\n *     following would have the server default to JSON responses:\n *\n *         response_output: \"application/json\"\n *\n * static_paths?: string[]\n *\n *     An array of static paths. Static paths are madepublic to clients.\n *     This means they can access anything in static paths. For example, if\n *     you have /public as a static path, then clients can look at things\n *     under your /path/to/your/server/public directory.\n */\nexport interface ServerConfigs { }"
+    ]
+  },
+  "Drash.Http.Server": {
+    "file": "./tests/data/file2.ts",
+    "members": [
+      "/**\n * Server handles the entire request-resource-response lifecycle. It is in\n * charge of handling HTTP requests to resources, static paths, sending\n * appropriate responses, and handling errors that bubble up within the\n * request-resource-response lifecycle.\n */\nexport class Server {\n  static REGEX_URI_MATCHES = new RegExp(/(:[^(/]+|{[^0-9][^}]*})/, \"g\");",
+      "/**\n * A property to hold the Deno server. This property is set in\n * this.run() like so:\n *\n *     this.deno_server = serve(HTTPOptions);\n *\n * serve() is imported from https://deno.land/x/http/server.ts.\n */public deno_server: DenoServer | null = null;",
+      "/**\n * The hostname of the Deno server.\n */public hostname: string = \"localhost\";",
+      "/**\n * The port of the Deno server.\n */public port: number = 1447;",
+      "/**\n * A property to hold this server's configs.\n */protected configs: Drash.Interfaces.ServerConfigs;",
+      "/**\n * A property to hold server-level middleware. This includes the following\n * middleware types:\n *\n *     - after request\n *     - after resource\n *     - before request\n *     - compile time\n *     - runtime\n */protected middleware: ServerMiddleware",
+      "/**\n * A property to hold this server's services.\n */protected services: IServices",
+      "/**\n * This server's list of static paths. HTTP requests to a static path are\n * usually intended to retrieve some type of concrete resource (e.g., a\n * CSS file or a JS file). If an HTTP request is matched to a static path\n * and the resource the HTTP request is trying to get is found, then\n * Drash.Http.Response will use its sendStatic() method to send the\n * static asset back to the client.\n *\n * TODO(crookse) Change this to a Map.\n */protected static_paths: string[] | { [key: string]: string } = [];",
+      "/**\n * This server's list of static paths as virtual paths. Virtual paths allow\n * users to map a path that does not exist to a physical path on their\n * filesystem. This is helpful when you want to structure your application's\n * filesystem in a way that separates sever- and client-side code. Instead of\n * giving end users access to your entire filesystem, you can give them access\n * to specific directories by using virtual paths. Also, see\n * `this.static_paths` for more information.\n */protected virtual_paths: Map<string, string> = new Map<string, string>();",
+      "/**\n * Construct an object of this class.\n *\n * @param configs - See Drash.Interfaces.ServerConfigs.\n */constructor(configs: Drash.Interfaces.ServerConfigs) {\n    this.configs = this.buildConfigs(configs);",
+      "/**\n * Handle an HTTP request from the Deno server.\n *\n * @param serverRequest - The incoming request object.\n *\n * @returns A Promise of ResponseOutput. See Drash.Interfaces.ResponseOutput\n * for more information.\n */public async handleHttpRequest(\n    serverRequest: ServerRequest,\n  ): Promise<Drash.Interfaces.ResponseOutput> {\n    const request = await this.buildRequest(serverRequest);\n    let response = this.buildResponse(request);",
+      "/**\n * Handle cases when an error is thrown when handling an HTTP request.\n *\n * @param request - The request object.\n * @param error - The error object.\n * @param resource - (optional) Pass in the resource that threw the error.\n * @param response - (optional) Pass in the response that threw the error.\n *\n * @returns A Promise of ResponseOutput. See Drash.Interfaces.ResponseOutput\n * for more information.\n */public async handleHttpRequestError(\n    request: Drash.Http.Request,\n    error: Drash.Exceptions.HttpException,\n    resource: Drash.Http.Resource | null = null,\n    response: Drash.Http.Response | null = null,\n  ): Promise<Drash.Interfaces.ResponseOutput> {\n    this.log(\n      `Error occurred while handling request: ${request.method} ${request.url}`,\n    );\n    this.log(error.message);\n    if (error.stack) {\n      this.log(\"Stack trace below:\");\n      this.log(error.stack);\n    }",
+      "/**\n * Handle HTTP requests for the favicon. This method only exists to\n * short-circuit favicon requests--preventing the requests from clogging\n * the logs.\n *\n * @param request - The request object\n *\n * @returns The response as stringified JSON. This is only used for\n * unit testing purposes. See Drash.Interfaces.ResponseOutput for more\n * information.\n */public async handleHttpRequestForFavicon(\n    request: Drash.Http.Request,\n  ): Promise<Drash.Interfaces.ResponseOutput> {\n    const response = this.buildResponse(request);\n    response.body = \"\";\n    response.headers = new Headers();\n    response.status_code = 200;",
+      "/**\n * Handle the HTTP rqeuest for the resource.\n *\n * @param request - The request object.\n * @param response - The response object.\n *\n * @returns See Drash.Interfaces.ResponseOutput for more information.",
+      "/**\n * Handle HTTP requests for static path assets.\n *\n * @param request - The request object\n *\n * @returns The response as stringified JSON. This is only used for unit\n * testing purposes.\n */public async handleHttpRequestForStaticPathAsset(\n    request: Drash.Http.Request,\n  ): Promise<Drash.Interfaces.ResponseOutput> {\n    const response = this.buildResponse(request);",
+      "/**\n * Handle HTTP requests for virtual path assets.\n *\n * @param request - The request object.\n *\n * @returns The response as stringified JSON. This is only used for unit\n * testing purposes.\n */public async handleHttpRequestForVirtualPathAsset(\n    request: Drash.Http.Request,\n  ): Promise<Drash.Interfaces.ResponseOutput> {\n    const response = this.buildResponse(request);",
+      "/**\n * Run the Deno server at the hostname specified in the configs. This method\n * takes each HTTP request and creates a new and more workable request object\n * and passes it to `.handleHttpRequest()`.\n *\n * @param options - The HTTPOptions interface from https://deno.land/std/http/server.ts.\n *\n * @returns A Promise of the Deno server from the serve() call.\n */public async run(options: HTTPOptions): Promise<DenoServer> {\n    if (!options.hostname) {\n      options.hostname = this.hostname;\n    }",
+      "/**\n * Run the Deno server at the hostname specified in the configs as an HTTPS\n * Server. This method takes each HTTP request and creates a new and more\n * workable request object and passes it to `.handleHttpRequest()`.\n *\n * @param options - The HTTPSOptions interface from https://deno.land/std/http/server.ts.\n *\n * @returns A Promise of the Deno server from the serve() call.\n */public async runTLS(options: HTTPSOptions): Promise<DenoServer> {\n    if (!options.hostname) {\n      options.hostname = this.hostname;\n    }",
+      "/**\n * Close the server.\n */public close(): void {\n    this.deno_server!.close();\n    this.deno_server = null;\n  }",
+      "/**\n * Add the middleware passed in via configs.\n */protected async addMiddleware(): Promise<void> {\n    if (!this.configs.middleware) {\n      return;\n    }",
+      "/**\n * Add an HTTP resource to the server which can be retrieved at specific\n * URIs.\n *\n * Drash defines an HTTP resource according to the MDN Web docs\n * [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Identifying_resources_on_the_Web).\n *\n * @param resourceClass - A child object of the `Drash.Http.Resource` class.\n */protected addResource(resourceClass: Drash.Interfaces.Resource): void {\n    // Define the variable that will hold the data to helping us match path\n    // params on the request during runtime\n    const resourceParsedPaths = [];",
+      "/**\n * Add the resources passed in via configs.\n */protected addResources(): void {\n    if (!this.configs.resources) {\n      return;\n    }",
+      "/**\n * Add a static path for serving static assets like CSS files, JS files,\n * PDF files, etc.\n *\n * @param path - The path where the static assets are located.\n * @param virtualPath - Is this a virtual path?\n */protected addStaticPath(\n    path: string,\n    virtualPath?: string,\n  ): void {\n    if (virtualPath) {\n      this.virtual_paths.set(virtualPath, path);\n      return;\n    }",
+      "/**\n * Add static paths passed in via configs.\n */protected addStaticPaths(): void {\n    const paths = this.configs.static_paths;",
+      "/**\n * Build the configs for this server -- making sure to set any necessary\n * defaults.\n *\n * @param configs - The configs passed in by the user.\n *\n * @return The configs.\n */protected buildConfigs(\n    configs: Drash.Interfaces.ServerConfigs,\n  ): Drash.Interfaces.ServerConfigs {\n    if (!configs.memory_allocation) {\n      configs.memory_allocation",
+      "/**\n * Get the request object with more properties and methods.\n *\n * @param request - The request object.\n *\n * @returns Returns a Drash request object--hydrated with more properties and\n * methods than the ServerRequest object. These properties and methods are\n * used throughout the Drash request-resource-response lifecycle.\n */protected async buildRequest(\n    serverRequest: ServerRequest,\n  ): Promise<Drash.Http.Request> {\n    const options: IRequestOptions",
+      "/**\n * Get the resource class.\n *\n * @param request - The request object.\n *\n * @returns A `Drash.Http.Resource` object if the URL path of the request can\n * be matched to a `Drash.Http.Resource` object's paths. Otherwise, it returns\n * `undefined` if a `Drash.Http.Resource` object can't be matched.\n */protected buildResource(\n    request: Drash.Http.Request,\n    response: Drash.Http.Response,\n  ): Drash.Http.Resource {\n    let resourceClass = this.findResource(request);",
+      "/**\n * Get a response object.\n *\n * @param request - The request object.\n *\n * @returns A response object.\n */protected buildResponse(request: Drash.Http.Request): Drash.Http.Response {\n    return new Drash.Http.Response(request, {\n      default_content_type: this.configs.response_output,\n    });\n  }",
+      "/**\n * Execute server-level middleware after the request.\n *\n * @param request - The request object.\n * @param resource - The resource object.\n */protected async executeMiddlewareAfterRequest(\n    request: Drash.Http.Request,\n    response: Drash.Http.Response | null = null,\n  ): Promise<void> {\n    if (this.middleware.runtime) {\n      if (response) {\n        await this.executeMiddlewareRuntime(\n          request,\n          response,\n        );\n      }\n    }",
+      "/**\n * Execute server-level middleware after a resource has been found, but before\n * the resource's HTTP request method is executed.\n *\n * @param request - The request object.\n * @param resource - The resource object.\n */protected async executeMiddlewareAfterResource(\n    request: Drash.Http.Request,\n    response: Drash.Http.Response,\n  ): Promise<void> {\n    if (this.middleware.after_resource != null) {\n      for (const middleware of this.middleware.after_resource) {\n        await middleware(request, response);\n      }\n    }\n  }",
+      "/**\n * Execute server-level middleware before the request.\n *\n * @param request - The request object.\n * @param resource - The resource object.\n */protected async executeMiddlewareBeforeRequest(\n    request: Drash.Http.Request,\n  ): Promise<void> {\n    if (this.middleware.before_request != null) {\n      for (const middleware of this.middleware.before_request) {\n        await middleware(request);\n      }\n    }\n  }",
+      "/**\n * Execute server level runtime middleware after requests. Runtime middleware\n * requires compile time data from compile time middleware.\n *\n * @param request - The request objecft.\n * @param response - The response object.\n */protected executeMiddlewareRuntime(\n    request: Drash.Http.Request,\n    response: Drash.Http.Response,\n  ): void {\n    let processed: boolean = false;",
+      "/**\n * The the resource that will handled the specified request based on the\n * request's URI.\n *\n * @param request - The request object.\n *\n * @return The resource as aconstructor function to be used in\n * `.buildResource()`.\n */protected findResource(\n    request: Drash.Http.Request,\n  ): Drash.Interfaces.Resource {\n    let resource: Drash.Interfaces.Resource | undefined = undefined;",
+      "/**\n * Get the path params in a request URL.\n *\n * @param resource - The resource that has the information about param names.\n * These param names are associated with the values of the path params in the\n * request URL.\n * @param matchArray - An array containing the path params (as well as other\n * information about the request URL).\n */protected getRequestPathParams(\n    resource: Drash.Interfaces.Resource | undefined,\n    matchArray: RegExpMatchArray | null,\n  ): { [key: string]: string } {\n    const pathParamsInKvpForm: { [key: string]: string }",
+      "/**\n * Get resource paths for the path in question. These paths are use to match\n * request URIs to a resource.\n *\n * @param path - The path to parse into parsable pieces.\n *\n * @return A resource paths object.\n */protected getResourcePaths(\n    path: string,\n  ): Drash.Interfaces.ResourcePaths {\n    return {\n      og_path: path,\n      regex_path: `^${\n        path.replace(\n          Server.REGEX_URI_MATCHES,\n          Server.REGEX_URI_REPLACEMENT,\n        )\n      }/?<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Drash Land | Docable</title>
+    <link rel="stylesheet" href="prismjs/themes/prism-tomorrow.css">
+    <style type="text/css">
+      html {
+        scroll-behavior: smooth;
+      }
+      .line-highlight {
+        background: linear-gradient(to right, hsl(152deg 73% 58% / 26%) 70%, hsla(24, 20%, 50%,0));
+      }
+    </style>
+  </head>
+  
+  <body>
+    <div id="app">
+      <div v-for="namespace in json">
+        <pre class="language-typescript" v-for="member in namespace.members"><code>{{ member }}</code></pre>
+      </div>
+    </div>
+
+    <script src="prismjs/prism.js"></script>
+    <script src="vue/dist/vue.js"></script>
+    <script type="text/javascript">
+      const app = new Vue({
+        data() {
+          return {
+            json: ,\n      params: (path.match(Server.REGEX_URI_MATCHES) || []).map(\n        (element: string) => {\n          return element.replace(/:|{|}/g, \"\");\n        },\n      ),\n    };\n  }",
+      "/**\n * Get resource paths for the path in question. The path in question should\n * have at least one optional param. An optiona param is like :id in the\n * following path:\n *\n *     /my-path/:id?\n *\n   . These paths are use\n * to match request URIs to a resource.\n *\n * @param path - The path to parse into parsable pieces.\n *\n * @return A resource paths object.\n */protected getResourcePathsUsingOptionalParams(\n    path: string,\n  ): Drash.Interfaces.ResourcePaths {\n    let tmpPath = path;\n    // Replace required params, in preparation to create the `regex_path`, just\n    // like how we do in the below else block\n    const numberOfRequiredParams = path.split(\"/\").filter((param) => {\n      // Ignores optional (`?`) params and only pulls how many required\n      // parameters the resource path contains, eg:\n      //   :age? --> ignore, :age --> dont ignore, {age} --> dont ignore\n      //   /users/:age/{name}/:city? --> returns 2 required params\n      return (param.includes(\":\") || param.includes(\"{\")) &&\n        !param.includes(\"?\");\n    }).length;\n    for (let i = 0; i < numberOfRequiredParams; i++) {\n      tmpPath = tmpPath.replace(\n        /(:[^(/]+|{[^0-9][^}]*})/, // same as REGEX_URI_MATCHES but not global\n        Server.REGEX_URI_REPLACEMENT,\n      );\n    }\n    // Replace optional path params\n    const maxOptionalParams = path.split(\"/\").filter((param) => {\n      return param.includes(\"?\");\n    }).length;\n    // Description for the below for loop and why we use it to create the regex\n    // for optional parameters: For each optional parameter in the path, we\n    // replace it with custom regex.  Similar to how other blocks construct the\n    // `regex_path`, but in this case, it isn't as easy as a simple `replace`\n    // one-liner, due to needing to account for optional parameters (:name?),\n    // and required parameters before optional params.  This is what we do to\n    // construct the `regex_path`. I haven't been able to come up with a regex\n    // that would replace all instances and work, which is why a loop is being\n    // used here, to replace the first instance of an optional parameter (to\n    // account for a possible required parameter before), and then replace the\n    // rest of the occurrences. It's slightly tricky because the path\n    // `/users/:name?/:age?/:city?` should match  `/users`.\n    for (let i = 0; i < maxOptionalParams; i++) {\n      // We need to mark the start for the first optional param\n      if (i === 0) {\n        // The below regex is very similar to `REGEX_URI_MATCHES` but this regex\n        // isn't global, and accounts for there being a required parameter\n        // before\n        tmpPath = tmpPath.replace(\n          /\\/(:[^(/]+|{[^0-9][^}]*}\\?)\\/?/,\n          // A `/` being optional, as well as the param being optional, and a\n          // ending `/` being optional\n          \"/?([^/]+)?/?\",\n        );\n      } else {\n        // We can now create the replace regex for the rest taking into\n        // consideration the above replace regex\n        tmpPath = tmpPath.replace(\n          /\\/?(:[^(/]+|{[^0-9][^}]*}\\?)\\/?/,\n          \"([^/]+)?/?\",\n        );\n      }\n    }",
+      "/**\n * Get resource paths for the wildcard path in question. These paths are use\n * to match request URIs to a resource.\n *\n * @param path - The path to parse into parsable pieces.\n *\n * @return A resource paths object.\n */protected getResourcePathsUsingWildcard(\n    path: string,\n  ): Drash.Interfaces.ResourcePaths {\n    return {\n      og_path: path,\n      regex_path: `^.${\n        path.replace(\n          Server.REGEX_URI_MATCHES,\n          Server.REGEX_URI_REPLACEMENT,\n        )\n      }/?<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Drash Land | Docable</title>
+    <link rel="stylesheet" href="prismjs/themes/prism-tomorrow.css">
+    <style type="text/css">
+      html {
+        scroll-behavior: smooth;
+      }
+      .line-highlight {
+        background: linear-gradient(to right, hsl(152deg 73% 58% / 26%) 70%, hsla(24, 20%, 50%,0));
+      }
+    </style>
+  </head>
+  
+  <body>
+    <div id="app">
+      <div v-for="namespace in json">
+        <pre class="language-typescript" v-for="member in namespace.members"><code>{{ member }}</code></pre>
+      </div>
+    </div>
+
+    <script src="prismjs/prism.js"></script>
+    <script src="vue/dist/vue.js"></script>
+    <script type="text/javascript">
+      const app = new Vue({
+        data() {
+          return {
+            json: ,\n      params: (path.match(Server.REGEX_URI_MATCHES) || []).map(\n        (element: string) => {\n          return element.replace(/:|{|}/g, \"\");\n        },\n      ),\n    };\n  }",
+      "/**\n * Used to check if a response object is of type Drash.Interfaces.ResponseOutput\n * or Drash.Http.Response.\n *\n * @return If the response returned from a method is what the returned value should be\n */protected isValidResponse(\n    request: Drash.Http.Request,\n    response: Drash.Http.Response,\n    resource: Drash.Http.Resource,\n  ): boolean {\n    // Method to aid inn checking is ann interface (Drash.Interface.ResponseOutput)\n    function responseIsOfTypeResponseOutput(response: any): boolean {\n      if (\n        (typeof response === \"object\") &&\n        (Array.isArray(response) === false) &&\n        (response !== null)\n      ) {\n        return \"status\" in response &&\n          \"headers\" in response &&\n          \"body\" in response &&\n          \"send\" in response &&\n          \"status_code\" in response;\n      }",
+      "/**\n * Listens for incoming HTTP connections on the server property\n */protected async listen() {\n    (async () => {\n      for await (const request of this.deno_server!) {\n        try {\n          this.handleHttpRequest(request as ServerRequest);\n        } catch (error) {\n          this.handleHttpRequestError(\n            request as Drash.Http.Request,\n            new Drash.Exceptions.HttpException(500),\n          );\n        }\n      }\n    })();\n  }",
+      "/**\n * Log a message. This only works if the server has a logger and it is set to\n * log \"debug\" level messages.\n *\n * @param message - Message to log\n */protected log(message: string): void {\n    if (!this.configs.logger) {\n      return;\n    }",
+      "/**\n * Is the request targeting a static path?\n *\n * @param request - The request object\n *\n * @returns Either true or false. If the request targets a static path then it\n * returns true. Otherwise it returns false.\n */protected requestTargetsStaticPath(request: Drash.Http.Request): boolean {\n    if (this.static_paths.length <= 0) {\n      return false;\n    }",
+      "/**\n * Is the request targeting a virtual path?\n *\n * @param request - The request object.\n *\n * @returns True if yes; false if no or if there are not any virtual paths\n * defined.\n */protected requestTargetsVirtualPath(serverRequest: ServerRequest): boolean {\n    if (this.virtual_paths.size <= 0) {\n      return false;\n    }"
+    ]
+  }
+}
+          };
+        },
+      }).$mount("#app");
+    </script>
+  </body>
+</html>
+

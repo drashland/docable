@@ -2,7 +2,7 @@
 
 /**
  * Contains the type of ServerConfigs
- * @remarks
+ *
  * directory?: string
  *
  *     The path to the directory of the server on the filesystem.  This is

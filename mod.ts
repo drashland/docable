@@ -73,7 +73,7 @@ export class Docable {
    *
    * @returns Doc blocks in JSON format.
    */
-  public run(): {[key: string]: IJsonOutput} | void {
+  public run(): string | void {
     for (const index in this.filepaths) {
       const filepath = this.filepaths[index];
 
@@ -105,7 +105,7 @@ export class Docable {
         // whitespace here
         member = member
           .replace(/\s+\*/g, " *")
-          .replace(/\s+\*/g, " *")
+          .replace(/\ \*/g, "\n *")
           .replace(/\s+protected/g, "protected")
           .replace(/\s+private/g, "private")
           .replace(/\s+public/g, "public")
@@ -115,7 +115,7 @@ export class Docable {
       });
     }
 
-    console.log(JSON.stringify(this.json_output, null, 2));
+    return JSON.stringify(this.json_output, null, 2);
   }
 
   ///////////////////////////////////////////////////////////////////////////////

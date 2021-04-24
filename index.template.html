@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Drash Land | Docable</title>
+    <link rel="stylesheet" href="prismjs/themes/prism-tomorrow.css">
+    <style type="text/css">
+      html {
+        scroll-behavior: smooth;
+      }
+      .line-highlight {
+        background: linear-gradient(to right, hsl(152deg 73% 58% / 26%) 70%, hsla(24, 20%, 50%,0));
+      }
+    </style>
+  </head>
+  
+  <body>
+    <div id="app">
+      <div v-for="namespace in json">
+        <pre class="language-typescript" v-for="member in namespace.members"><code>{{ member }}</code></pre>
+      </div>
+    </div>
+
+    <script src="prismjs/prism.js"></script>
+    <script src="vue/dist/vue.js"></script>
+    <script type="text/javascript">
+      const app = new Vue({
+        data() {
+          return {
+            json: {{ json_replacement }}
+          };
+        },
+      }).$mount("#app");
+    </script>
+  </body>
+</html>
+
